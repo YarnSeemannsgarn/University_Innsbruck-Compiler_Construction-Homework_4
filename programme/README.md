@@ -14,7 +14,7 @@ If you want to clean up just do:
       $ make clean
 
 
-Where is the solution for task 2?
+Where is the solution for task 1?
 =================================
 
-In task2.txt
+In task_1.pdf
