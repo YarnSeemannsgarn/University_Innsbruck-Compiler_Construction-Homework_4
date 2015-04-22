@@ -1,20 +1,44 @@
 #include "parser.h"
 #include "lex.yy.c"
 #include "tokens.h"
+#include "set.h"
+#include "first_sets.h"
+#include "follow_sets.h"
 
 enum Tokens token;
 
 int main() {
+  initializeFirstSets();
+  initializeFollowSets();
+
   token = yylex();
+  checkInput(FIRST_SET_START, FOLLOW_SET_START, "START");
   match(PROGRAM);
   program();
   printf("There are no lexical and syntactical errors\n");
   return 0;
 }
 
+void checkInput(node firstSet, node followSet, char *setName){
+  // Task 2: Error detection
+  if(search_for(firstSet, token) == NULL){
+    char message[100];
+    sprintf(message, "Token not in first set of %s. Parser scans until it reaches token of first or follow set", setName);
+    syntacticError(message);
+    
+    // Task 3: Error recovery
+    scanTo(firstSet, followSet);
+  }
+}
+
+void scanTo(node firstSet, node followSet){
+  while(search_for(firstSet, token) == NULL && search_for(followSet, token) == NULL && token != _EOF){
+    token = yylex();
+  }
+}
+
 void syntacticError(char *message){
-  fprintf(stderr, "Syntactic error (line: %d, token: %s): \"%s\"\n", yylineno, yytext, message); 
-  exit(1);
+  fprintf(stderr, "Syntactic error (line: %d, token: %s): \"%s\"\n", yylineno, yytext, message);
 }
 
 /* For terminals */
@@ -27,6 +51,7 @@ void match(enum Tokens expectedToken){
     char message[40];
     sprintf(message, "Expected token %s", stringFromToken(expectedToken));
     syntacticError(message);
+    exit(1);
   }
 }
 
@@ -60,12 +85,14 @@ void varDecList2(){
 }
 
 void identListType(){
+  checkInput(FIRST_SET_IDENT_LIST_TYPE, FOLLOW_SET_IDENT_LIST_TYPE, "IDENT_LIST_TYPE");
   identList();
   match(COLON);
   type();
 }
 
 void identList(){
+  checkInput(FIRST_SET_IDENT_LIST, FOLLOW_SET_IDENT_LIST, "IDENT_LIST");
   match(ID);
   identList2();
 }
@@ -78,6 +105,7 @@ void identList2(){
 }
 
 void type(){
+  checkInput(FIRST_SET_TYPE, FOLLOW_SET_TYPE, "TYPE");
   if(token == ARRAY){
     match(ARRAY);
     match(LEFT_SQUARE_BRACKET);
@@ -94,6 +122,7 @@ void type(){
 }
 
 void simpleType(){
+  checkInput(FIRST_SET_SIMPLE_TYPE, FOLLOW_SET_SIMPLE_TYPE, "SIMPLE_TYPE");
   switch(token){
   case INTEGER: match(INTEGER); break;
   case REAL: match(REAL); break;
@@ -103,12 +132,14 @@ void simpleType(){
 }
 
 void compStmt(){
+  checkInput(FIRST_SET_COMP_STMT, FOLLOW_SET_COMP_STMT, "COMP_STMT");
   match(_BEGIN);
   stmtList();
   match(END);
 }
 
 void stmtList(){
+  checkInput(FIRST_SET_STMT_LIST, FOLLOW_SET_STMT_LIST, "STMT_LIST");
   statement();
   stmtList2();
 }
@@ -121,6 +152,7 @@ void stmtList2(){
 }
 
 void statement(){
+  checkInput(FIRST_SET_STATEMENT, FOLLOW_SET_STATEMENT, "STATEMENT");
   switch(token){
   case ID: assignStmt(); break;
   case _BEGIN: compStmt(); break;
@@ -144,11 +176,13 @@ void statement(){
 }
 
 void assignStmt(){
+  checkInput(FIRST_SET_ASSIGN_STMT, FOLLOW_SET_ASSIGN_STMT, "ASSIGN_STMT");
   match(ID);
   assignStmt2();
 }
 
 void assignStmt2(){
+  checkInput(FIRST_SET_ASSIGNT_STMT_2, FOLLOW_SET_ASSIGN_STMT_2, "ASSIGN_STMT_2");
   switch(token){
   case ASSIGNMENT:
     match(ASSIGNMENT);
@@ -166,6 +200,7 @@ void assignStmt2(){
 }
 
 void ifStmt(){
+  checkInput(FIRST_SET_IF_STMT, FOLLOW_SET_IF_STMT, "IF_STMT");
   match(IF);
   expr();
   match(THEN);
@@ -181,6 +216,7 @@ void elsePart(){
 }
 
 void whileStmt(){
+  checkInput(FIRST_SET_WHILE_STMT, FOLLOW_SET_WHILE_STMT, "WHILE_STMT");
   match(WHILE);
   expr();
   match(DO);
@@ -188,6 +224,7 @@ void whileStmt(){
 }
 
 void forStmt(){
+  checkInput(FIRST_SET_FOR_STMT, FOLLOW_SET_FOR_STMT, "FOR_STMT");
   match(FOR);
   match(ID);
   match(ASSIGNMENT);
@@ -199,6 +236,7 @@ void forStmt(){
 }
 
 void toPart(){
+  checkInput(FIRST_SET_TO_PART, FOLLOW_SET_TO_PART, "TO_PART");
   switch(token){
   case TO: match(TO); break;
   case DOWNTO: match(DOWNTO); break;
@@ -207,6 +245,7 @@ void toPart(){
 }
 
 void expr(){
+  checkInput(FIRST_SET_EXPR, FOLLOW_SET_EXPR, "EXPR");
   simpleExpr();
   expr2();
 }
@@ -226,6 +265,7 @@ void expr2(){
 }
 
 void exprList(){
+  checkInput(FIRST_SET_EXPR_LIST, FOLLOW_SET_EXPR_LIST, "EXPR_LIST");
   expr();
   exprList2();
 }
@@ -238,6 +278,7 @@ void exprList2(){
 }
 
 void simpleExpr(){
+  checkInput(FIRST_SET_SIMPLE_EXPR, FOLLOW_SET_SIMPLE_EXPR, "SIMPLE_EXPR");
   term();
   simpleExpr2();
 }
@@ -250,6 +291,7 @@ void simpleExpr2(){
 }
 
 void term(){
+  checkInput(FIRST_SET_TERM, FOLLOW_SET_TERM, "TERM");
   factor();
   term2();
 }
@@ -262,6 +304,7 @@ void term2(){
 }
 
 void factor(){
+  checkInput(FIRST_SET_FACTOR, FOLLOW_SET_FACTOR, "FACTOR");
   switch(token){
   case NUMBER: match(NUMBER); break;
   case FALSE: match(FALSE); break;
@@ -299,6 +342,7 @@ void factorIdent(){
 }
 
 void relOp(){
+  checkInput(FIRST_SET_REL_OP, FOLLOW_SET_REL_OP, "REL_OP");
   switch(token){
   case LESS_THAN: match(LESS_THAN); break;
   case LESS_EQUAL_THAN: match(LESS_EQUAL_THAN); break;
@@ -311,6 +355,7 @@ void relOp(){
 }
 
 void addOp(){
+  checkInput(FIRST_SET_ADD_OP, FOLLOW_SET_ADD_OP, "ADD_OP");
   switch(token){
   case PLUS: match(PLUS); break;
   case MINUS: match(MINUS); break;
@@ -320,6 +365,7 @@ void addOp(){
 }
 
 void mulOp(){
+  checkInput(FIRST_SET_MUL_OP, FOLLOW_SET_MUL_OP, "MUL_OP");
   switch(token){
   case STAR: match(STAR); break;
   case SLASH: match(SLASH); break;

@@ -1,12 +1,19 @@
 /* Taken from http://perlgeek.de/de/artikel/einfach-verkettete-listen */
+#include <stdlib.h>
 #include "set.h"
-#inckude "tokens.h"
+#include "tokens.h"
+
+node create_set(enum Tokens terminal){
+  node new_node = (node) malloc(sizeof(struct set_node));
+  new_node->terminal = terminal;
+  new_node->next = NULL;
+}
 
 node insert_right(node set, enum Tokens terminal){
   node new_node = (node) malloc(sizeof(struct set_node));
   new_node->terminal = terminal;
   new_node->next = set->next;
-  set->next     = new_node;
+  set->next = new_node;
   return new_node;
 }
 

@@ -10,7 +10,8 @@ struct set_node {
 
 typedef struct set_node* node;
 
+node create_set(enum Tokens terminal);
 node insert_right(node set, enum Tokens terminal);
-node search_for(node set, enum Tokens terminal) {
+node search_for(node set, enum Tokens terminal);
 
 #endif

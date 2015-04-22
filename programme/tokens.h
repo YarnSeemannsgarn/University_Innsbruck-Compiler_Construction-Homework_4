@@ -1,8 +1,6 @@
 #ifndef TOKENS_H
 #define TOKENS_H
 
-#define enumStr(x) #x
-
 enum Tokens{
   /* Keywords */
   PROGRAM,

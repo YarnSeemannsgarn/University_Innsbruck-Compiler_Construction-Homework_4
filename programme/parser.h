@@ -2,8 +2,11 @@
 #define PARSER_H
 
 #include "tokens.h"
+#include "set.h"
 
 int main();
+void checkInput(node firstSet, node followSet, char *setName);
+void scanTo(node firstSet, node followSet);
 void syntacticError(char *message);
 
 void match(enum Tokens expectedToken);
