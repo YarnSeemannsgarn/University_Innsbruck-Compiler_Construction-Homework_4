@@ -15,7 +15,6 @@ int main() {
   checkInput(FIRST_SET_START, FOLLOW_SET_START, "START");
   match(PROGRAM);
   program();
-  printf("There are no lexical and syntactical errors\n");
   return 0;
 }
 
@@ -35,10 +34,16 @@ void scanTo(node firstSet, node followSet){
   while(search_for(firstSet, token) == NULL && search_for(followSet, token) == NULL && token != _EOF){
     token = yylex();
   }
+  if(search_for(firstSet, token) != NULL){
+    printf("Found token in first set (line: %d, token: \"%s\")\n", yylineno, yytext); 
+  }
+  else if(search_for(followSet, token) != NULL){
+    printf("Found token in follow set (line: %d, token: \"%s\")\n", yylineno, yytext); 
+  }
 }
 
 void syntacticError(char *message){
-  fprintf(stderr, "Syntactic error (line: %d, token: %s): \"%s\"\n", yylineno, yytext, message);
+  fprintf(stderr, "Syntactic error (line: %d, token: \"%s\"): %s\n", yylineno, yytext, message);
 }
 
 /* For terminals */
@@ -49,7 +54,7 @@ void match(enum Tokens expectedToken){
   }
   else{
     char message[40];
-    sprintf(message, "Expected token %s", stringFromToken(expectedToken));
+    sprintf(message, "Expected token \"%s\"", stringFromToken(expectedToken));
     syntacticError(message);
     exit(1);
   }
