@@ -7,6 +7,7 @@ node create_set(enum Tokens terminal){
   node new_node = (node) malloc(sizeof(struct set_node));
   new_node->terminal = terminal;
   new_node->next = NULL;
+  return new_node;
 }
 
 node insert_right(node set, enum Tokens terminal){
